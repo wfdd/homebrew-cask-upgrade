@@ -3,10 +3,12 @@ require "extend/hbc"
 module Bcu
   def self.process(args)
     Hbc.outdated.each do |app|
-      puts "==> Upgrading #{app[:name]} to #{app[:latest]}"
-      system "brew cask install #{app[:name]} --force"
-      app[:installed].each do |version|
-        system "rm -rf #{CASKROOM}/#{app[:name]}/#{version}"
+      if system "brew cask fetch #{app[:name]}"
+        puts "==> Upgrading #{app[:name]} to #{app[:latest]}"
+        system "brew cask uninstall #{app[:name]} --force"
+        system "brew cask install #{app[:name]}"
+      else
+        puts "==> Skipping #{app[:name]}; unable to fetch version #{app[:latest]}"
       end
     end
   end
